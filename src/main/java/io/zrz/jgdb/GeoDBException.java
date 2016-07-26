@@ -15,4 +15,8 @@ public class GeoDBException extends RuntimeException {
     super(string);
   }
 
+  public GeoDBException(String message, Throwable ex) {
+    super(message, ex);
+  }
+
 }

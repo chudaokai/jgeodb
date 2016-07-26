@@ -30,4 +30,8 @@ public interface GeoBuffer {
 
   float readF32();
 
+  long readUInt32();
+
+  int readUInt8();
+
 }

@@ -65,17 +65,12 @@ public class GeoFeatureTable implements AutoCloseable {
    * @return
    */
 
-  public Object getFeature(final int featureId) {
-    try {
-      final int offset = this.index.getFeatureOffset(featureId - 1);
-      if (offset == 0) {
-        return null;
-      }
-      return this.table.getRow(featureId, offset);
-    } catch (final IOException e) {
-      this.close();
-      throw new GeoDBException(e);
+  public GeoFeature getFeature(final int featureId) {
+    final int offset = this.index.getFeatureOffset(featureId - 1);
+    if (offset == -1) {
+      return null;
     }
+    return this.table.getRow(featureId, offset);
   }
 
   @Override
@@ -89,7 +84,7 @@ public class GeoFeatureTable implements AutoCloseable {
       this.index = null;
     }
     this.db.closed(this);
-   
+
   }
 
   public void scan(final RowConsumer feature) {

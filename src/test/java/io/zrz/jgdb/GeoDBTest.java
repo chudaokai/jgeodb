@@ -69,37 +69,44 @@ public class GeoDBTest {
   }
 
   private void scanTable(GeoDB db, String tableName) {
+    try {
 
-    System.err.println(String.format("  Layer: %s", tableName));
+      System.err.println(String.format("  Layer: %s", tableName));
 
-    GeoFeatureTable table = db.table(tableName);
+      GeoFeatureTable table = db.table(tableName);
 
-    System.err.println(String.format("  Table ID: 0x%x", table.getTableId()));
+      System.err.println(String.format("  Table ID: 0x%x", table.getTableId()));
 
-    System.err.println(String.format("  Feature Count: %d", table.getFeatureCount()));
+      System.err.println(String.format("  Feature Count: %d", table.getFeatureCount()));
 
-    if (table.getShapeField().isPresent()) {
+      if (table.getShapeField().isPresent()) {
 
-      GeometryFieldType geo = ((GeometryFieldType) table.getField("Shape").getType());
+        GeometryFieldType geo = ((GeometryFieldType) table.getField("Shape").getType());
 
-      System.err.println("  Layer SRS WKT: " + geo.getWkt());
+        System.err.println("  Layer SRS WKT: " + geo.getWkt());
 
-      System.err.println(String.format("  Extent: (%.06f, %.06f) - (%.06f, %.06f)",
-          geo.getXmin(), geo.getYmin(),
-          geo.getXmax(), geo.getYmax()));
+        System.err.println(String.format("  Extent: (%.06f, %.06f) - (%.06f, %.06f)",
+            geo.getXmin(), geo.getYmin(),
+            geo.getXmax(), geo.getYmax()));
+
+      }
+
+      for (Field field : table.getFields()) {
+        if (field != table.getShapeField().orElse(null))
+          System.err.println(String.format("  %s = %s", field.getName(), field.getType()));
+      }
+
+      table.scan(row -> {
+
+      });
+
+      System.err.println();
+
+    } catch (Exception ex) {
+
+      throw new RuntimeException(String.format("While scanning '%s'", tableName), ex);
 
     }
-
-    for (Field field : table.getFields()) {
-      if (field != table.getShapeField().orElse(null))
-        System.err.println(String.format("  %s = %s", field.getName(), field.getType()));
-    }
-
-    table.scan(row -> {
-
-    });
-
-    System.err.println();
 
   }
 
@@ -152,12 +159,15 @@ public class GeoDBTest {
   public void testOpenV10_2() {
 
     final GeoDB db = GeoDBFactory.open(Paths.get("/tmp/UtahPLSS_Fabric_D5_FR_021916.gdb"));
+
     assertEquals(VersionFormat.V10, db.getVersion());
 
+    // GeoFeatureTable table = db.table("Utah_Parcel_Fabric_Lines");
+
     // scanTable(db, "Utah_Parcel_Fabric_Control");
-    // dumpTable(db, "Utah_Parcel_Fabric_Points");
-    // dumpTable(db, "Utah_Parcel_Fabric_Parcels");
-    // dumpTable(db, "Utah_Parcel_Fabric_Lines");
+    // scanTable(db, "Utah_Parcel_Fabric_Points");
+    // scanTable(db, "Utah_Parcel_Fabric_Parcels");
+    // scanTable(db, "Utah_Parcel_Fabric_Lines");
 
     for (String tableName : db.getFeatureTables()) {
       scanTable(db, tableName);

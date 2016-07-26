@@ -23,15 +23,15 @@ final class GeoDB_R4 extends AbstractGeoDB {
 
   private static final int GDB_SystemCatalog_ID = 0x1;
 
-  private static final int GDB_DBTune_ID = 0x2;
-  private static final int GDB_SpatialRefs_ID = 0x3;
-  private static final int GDB_Release_ID = 0x4;
-  private static final int GDB_FeatureDataset_ID = 0x5;
-  private static final int GDB_ObjectClasses_ID = 0x6;
-  private static final int GDB_FeatureClasses_ID = 0x7;
-  private static final int GDB_FieldInfo_ID = 0x8;
-
-  private static final int MIN_SYSTEM_TABLE = 36;
+  // private static final int GDB_DBTune_ID = 0x2;
+  // private static final int GDB_SpatialRefs_ID = 0x3;
+  // private static final int GDB_Release_ID = 0x4;
+  // private static final int GDB_FeatureDataset_ID = 0x5;
+  // private static final int GDB_ObjectClasses_ID = 0x6;
+  // private static final int GDB_FeatureClasses_ID = 0x7;
+  // private static final int GDB_FieldInfo_ID = 0x8;
+  //
+  // private static final int MIN_SYSTEM_TABLE = 36;
 
   private static final int MIN_FEATURE_TABLE_ID = 0x3E;
 
@@ -111,7 +111,6 @@ final class GeoDB_R4 extends AbstractGeoDB {
         .filter(e -> e.getTableId() >= MIN_FEATURE_TABLE_ID)
         .collect(Collectors.toMap(a -> a.getTableName(), a -> a));
 
-
   }
 
   /**
@@ -121,7 +120,7 @@ final class GeoDB_R4 extends AbstractGeoDB {
    * @return
    */
 
-  @Override  
+  @Override
   public GeoFeatureTable table(String name) {
     CatalogItem fid = this.userTables.get(name);
     if (fid == null) {
@@ -132,6 +131,7 @@ final class GeoDB_R4 extends AbstractGeoDB {
 
   /**
    * (non-Javadoc)
+   * 
    * @see io.zrz.jgdb.GeoDB#getFeatureTables()
    */
 

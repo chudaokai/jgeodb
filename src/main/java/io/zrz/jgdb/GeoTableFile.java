@@ -37,7 +37,7 @@ public class GeoTableFile {
     @Override
     public Object read(GeoBuffer file) throws IOException {
 
-      int clen = readUnsignedVarInt(file);
+      int clen = file.readVarUInt32();
 
       if (clen == 0) {
         return null;
@@ -80,7 +80,7 @@ public class GeoTableFile {
     @Override
     public Object read(GeoBuffer file) throws IOException {
 
-      int len = readUnsignedVarInt(file);
+      int len = file.readVarUInt32();
 
       byte data[] = new byte[len];
 
@@ -111,7 +111,7 @@ public class GeoTableFile {
 
     @Override
     public Object read(GeoBuffer file) throws IOException {
-      int len = readUnsignedVarInt(file);
+      int len = file.readVarUInt32();
       byte data[] = new byte[len];
       file.readFully(data);
       return data;
@@ -316,13 +316,13 @@ public class GeoTableFile {
     public Object read(GeoBuffer file) throws IOException {
 
       // the length.
-      int len = readUnsignedVarInt(file);
+      int len = file.readVarUInt32();
 
-      //
+      // the current position
       long pos = file.getFilePointer();
 
       // the geometry type.
-      int type = (int) file.readVarUInt64();
+      int type = file.readVarUInt32();
 
       //
 
@@ -424,7 +424,7 @@ public class GeoTableFile {
 
       // GeoBuffer buffer = new GeoFileBuffer(cfile, len);
 
-      int npoints = (int) buffer.readVarUInt64();
+      int npoints = buffer.readVarUInt32();
 
       if (npoints < 0 || npoints > (50 * 1000 * 1000)) {
         throw new IllegalArgumentException();
@@ -471,7 +471,7 @@ public class GeoTableFile {
         remain -= pointsperpart;
 
         if (remain < 0) {
-          throw new GeoDBException(String.format("Invalid number of points"));
+          throw new GeoDBException(String.format("Invalid number of points: %d", remain));
         }
 
         parts.points[i] = new Point();
@@ -1086,50 +1086,6 @@ public class GeoTableFile {
     return file.readVarUInt32();
   }
 
-  private static int readUnsignedVarInt(GeoBuffer file) throws IOException {
-
-    return file.readVarInt32();
-
-  }
-
-  private static long readUnsignedVarLong(RandomAccessFile file) throws IOException {
-
-    //
-
-    long ret = 0;
-
-    for (int i = 0; i < 8; ++i) {
-
-      int b = file.readUnsignedByte();
-
-      ret = ret | ((b & 0x7F) << (i * 7));
-
-      if ((b & 0x80) == 0)
-        return ret;
-
-    }
-
-    return ret;
-
-  }
-
-  private static long readVarLong(RandomAccessFile file) throws IOException {
-
-    long ret = 0;
-    int shift = 0;
-
-    for (int i = 0; i < 8; ++i) {
-      int b = file.readUnsignedByte();
-      ret = ret | ((b & 0x7F) << shift);
-      if ((b & 0x80) == 0)
-        return ret;
-      shift += 7;
-    }
-
-    return ret;
-
-  }
-
   private String readUTFString() throws IOException {
 
     int utf16len = file.readUnsignedByte();
@@ -1168,62 +1124,72 @@ public class GeoTableFile {
 
   GeoFeature getRow(long featureId, long offset) {
 
-    GeoFeature.GeoFeatureBuilder fb = GeoFeature.builder();
-
-    fb.featureId(featureId);
-
-    fb.fields(this.fields);
-
     try {
 
-      file.seek(offset);
+      GeoFeature.GeoFeatureBuilder fb = GeoFeature.builder();
 
-      // not used, but none the less we need to read or skip it.
-      int blobLen = Integer.reverseBytes(file.readInt());
+      fb.featureId(featureId);
 
-      // ByteBuffer buf = ByteBuffer.allocate(blobLen);
+      fb.fields(this.fields);
 
-      int nullable = (int) Math.ceil(getNullableFields().size() / 8.0);
+      try {
 
-      byte[] flags = new byte[nullable];
+        file.seek(offset);
 
-      file.readFully(flags);
+        // the length of the data ..
+        int blobLen = file.readInt32();
 
-      int nullflagpos = 0;
-
-      int id = 0;
-
-      BitSet nullflags = BitSet.valueOf(flags);
-
-      for (Field f : this.fields) {
-
-        int x = 1 << (nullflagpos % 8);
-
-        boolean nulled = (f.getType().isNullable()) && nullflags.get(nullflagpos);
-
-        if (f.getType().isNullable()) {
-          ++nullflagpos;
+        if (blobLen < 0) {
+          throw new GeoDBException(String.format("Crazy sized row at byte offset %d (%d)", offset, blobLen));
         }
 
-        if (this.fidId == null || this.fidId != id) {
+        int pos = (int) file.getFilePointer();
+        byte[] buf = new byte[blobLen];
+        file.readFully(buf);
+        file.seek(pos);
 
-          if (nulled) {
-            fb.value(f.getType().getDefaultValue());
-          } else {
-            // read the field.
-            fb.value(f.getType().read(file));
+        int nullable = (int) Math.ceil(getNullableFields().size() / 8.0);
+
+        byte[] flags = new byte[nullable];
+
+        file.readFully(flags);
+
+        int nullflagpos = 0;
+
+        int id = 0;
+
+        BitSet nullflags = BitSet.valueOf(flags);
+
+        for (Field f : this.fields) {
+
+          boolean nulled = (f.getType().isNullable()) && nullflags.get(nullflagpos);
+
+          if (f.getType().isNullable()) {
+            ++nullflagpos;
           }
 
+          if (this.fidId == null || this.fidId != id) {
+
+            if (nulled) {
+              fb.value(f.getType().getDefaultValue());
+            } else {
+              // read the field.
+              fb.value(f.getType().read(file));
+            }
+
+          }
+
+          ++id;
+
         }
 
-        ++id;
+        return fb.build();
 
+      } catch (final IOException e) {
+        throw new RuntimeException(e);
       }
-
-      return fb.build();
-
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
+    } catch (Exception ex) {
+      throw new GeoDBException(String.format("While processing FID %d", featureId), ex);
     }
 
   }

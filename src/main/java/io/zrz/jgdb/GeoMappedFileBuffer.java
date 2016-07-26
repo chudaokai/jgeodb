@@ -24,22 +24,22 @@ public class GeoMappedFileBuffer implements GeoBuffer {
 
   @Override
   public char readChar() {
-      char ch = map.getChar(pos);
-      pos += 2;
-      return ch;
+    char ch = map.getChar(pos);
+    pos += 2;
+    return ch;
   }
 
   @Override
   public float readF32() {
-      float ch = map.getFloat(pos);
-      pos += 4;
-      return ch;
+    float ch = map.getFloat(pos);
+    pos += 4;
+    return ch;
   }
 
   private short readShort() {
-      short ch = map.getShort(pos);
-      pos += 2;
-      return ch;
+    short ch = map.getShort(pos);
+    pos += 2;
+    return ch;
   }
 
   public int readUnsignedByte() {
@@ -47,21 +47,21 @@ public class GeoMappedFileBuffer implements GeoBuffer {
   }
 
   public byte readByte() {
-      byte ch = map.get(pos);
-      pos += 1;
-      return ch;
+    byte ch = map.get(pos);
+    pos += 1;
+    return ch;
   }
 
   public int readInt() {
-      int ch = map.getInt(pos);
-      pos += 4;
-      return ch;
+    int ch = map.getInt(pos);
+    pos += 4;
+    return ch;
   }
 
   public long readLong() {
-      long ch = map.getLong(pos);
-      pos += 8;
-      return ch;
+    long ch = map.getLong(pos);
+    pos += 8;
+    return ch;
   }
 
   //
@@ -76,44 +76,27 @@ public class GeoMappedFileBuffer implements GeoBuffer {
   }
 
   @Override
+  public long readUInt32() {
+    return Integer.reverseBytes(readInt()) & 0x00000000ffffffffL;
+  }
+
+  @Override
   public double readD64() {
     return Double.longBitsToDouble(Long.reverseBytes(readLong()));
   }
 
   @Override
-  public int readVarInt32() {
-
-    int ret = 0;
-    int shift = 0;
-
-    for (int i = 0; i < 4; ++i) {
-      int b = readUnsignedByte();
-      ret = ret | ((b & 0x7F) << shift);
-      if ((b & 0x80) == 0)
-        return ret;
-      shift += 7;
-    }
-
-    return ret;
-
-  }
-
-  @Override
   public int readVarUInt32() {
-
-    int ret = 0;
     int shift = 0;
-
-    for (int i = 0; i < 4; ++i) {
-      int b = readUnsignedByte();
-      ret = ret | ((b & 0x7F) << shift);
+    int result = 0;
+    while (shift < 32) {
+      byte b = readByte();
+      result |= (int) (b & 0x7F) << shift;
       if ((b & 0x80) == 0)
-        return ret;
+        return result;
       shift += 7;
     }
-
-    return ret;
-
+    throw new IllegalArgumentException("malformed");
   }
 
   @Override
@@ -128,6 +111,36 @@ public class GeoMappedFileBuffer implements GeoBuffer {
       shift += 7;
     }
     throw new IllegalArgumentException("malformed");
+  }
+
+  @Override
+  public int readVarInt32() {
+
+    int b = readUnsignedByte();
+
+    int ret = (b & 0x3F);
+    int sign = 1;
+
+    if ((b & 0x40) != 0) {
+      sign = -1;
+    }
+
+    if ((b & 0x80) == 0) {
+      return sign * ret;
+    }
+
+    int shift = 6;
+
+    while (true) {
+      b = readUnsignedByte();
+      ret |= (int) ((b & 0x7F) << shift);
+      if ((b & 0x80) == 0)
+        break;
+      shift += 7;
+    }
+
+    return sign * ret;
+
   }
 
   @Override
@@ -167,23 +180,20 @@ public class GeoMappedFileBuffer implements GeoBuffer {
 
   @Override
   public void seek(long pos) {
-      this.pos = (int) pos;
+    this.pos = (int) pos;
   }
 
   @Override
   public void skipBytes(int i) {
-      pos += i;
+    pos += i;
   }
 
   @Override
   public void readFully(byte[] defaultValue) {
-
-      for (int i = 0; i < defaultValue.length; ++i)
-        defaultValue[i] = map.get(this.pos + i);
-
-
-      pos += defaultValue.length;
-
+    map.position(this.pos);
+    map.get(defaultValue, 0, defaultValue.length);
+    map.position(map.position() - defaultValue.length);
+    pos += defaultValue.length;
   }
 
   @Override
@@ -197,6 +207,11 @@ public class GeoMappedFileBuffer implements GeoBuffer {
     } catch (IOException e) {
       // nothing to do.
     }
+  }
+
+  @Override
+  public int readUInt8() {
+    return readUnsignedByte();
   }
 
 }

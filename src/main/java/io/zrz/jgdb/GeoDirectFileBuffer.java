@@ -224,4 +224,14 @@ public class GeoDirectFileBuffer implements GeoBuffer {
     }
   }
 
+  @Override
+  public long readUInt32() {
+    return readInt32() & 0x00000000ffffffffL;
+  }
+
+  @Override
+  public int readUInt8() {
+    return readUnsignedByte();
+  }
+
 }
