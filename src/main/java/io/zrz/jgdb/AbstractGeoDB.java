@@ -33,7 +33,7 @@ abstract class AbstractGeoDB implements GeoDB {
    * tables that are currently open.
    */
 
-  private Set<GeoFeatureTable> opened = new HashSet<>();
+  private Set<GeoTable> opened = new HashSet<>();
 
   /**
    * 
@@ -121,8 +121,8 @@ abstract class AbstractGeoDB implements GeoDB {
    * @return
    */
 
-  protected GeoFeatureTable openTable(long tableId, int tableVersion) {
-    final GeoFeatureTable index = GeoFeatureTable.open(this, tableId);
+  protected GeoTable openTable(long tableId, int tableVersion) {
+    final GeoTable index = GeoTable.open(this, tableId);
     if (index.getVersion() != tableVersion) {
       throw new IllegalArgumentException(String.format("Unexpected Table Version: %d", index.getVersion()));
     }
@@ -130,7 +130,7 @@ abstract class AbstractGeoDB implements GeoDB {
     return index;
   }
 
-  public void closed(GeoFeatureTable table) {
+  public void closed(GeoTable table) {
     this.opened.remove(table);
   }
 

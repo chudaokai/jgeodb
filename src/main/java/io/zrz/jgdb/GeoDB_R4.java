@@ -83,9 +83,9 @@ final class GeoDB_R4 extends AbstractGeoDB {
   protected void openCatalog() {
 
     // build the names and mappings.
-    GeoFeatureTable index = this.openTable(GDB_SystemCatalog_ID, TABLE_VERSION);
+    GeoTable index = this.openTable(GDB_SystemCatalog_ID, TABLE_VERSION);
 
-    index.scan((feature) -> {
+    index.forEach((feature) -> {
 
       if (!this.tableExists(feature.getFeatureId())) {
         return;
@@ -121,7 +121,7 @@ final class GeoDB_R4 extends AbstractGeoDB {
    */
 
   @Override
-  public GeoFeatureTable table(String name) {
+  public GeoTable layer(String name) {
     CatalogItem fid = this.userTables.get(name);
     if (fid == null) {
       throw new IllegalArgumentException(name);
@@ -132,19 +132,19 @@ final class GeoDB_R4 extends AbstractGeoDB {
   /**
    * (non-Javadoc)
    * 
-   * @see io.zrz.jgdb.GeoDB#getFeatureTables()
+   * @see io.zrz.jgdb.GeoDB#getLayers()
    */
 
   @Override
-  public List<String> getFeatureTables() {
+  public List<String> getLayers() {
     return this.userTables.values().stream()
         .map(item -> item.getTableName())
         .collect(Collectors.toList());
   }
 
   @Override
-  public VersionFormat getVersion() {
-    return VersionFormat.V9;
+  public FileGDBVersion getVersion() {
+    return FileGDBVersion.V9;
   }
 
   // ---

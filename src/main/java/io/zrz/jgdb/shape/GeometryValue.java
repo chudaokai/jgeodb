@@ -1,6 +1,4 @@
-package io.zrz.jgdb;
-
-import lombok.Value;
+package io.zrz.jgdb.shape;
 
 /**
  * a stored geometry value.
@@ -16,17 +14,5 @@ import lombok.Value;
 public interface GeometryValue {
 
   void visit(GeometryValueVisitor visitor);
-
-  @Value
-  public static class PointValue implements GeometryValue {
-
-    double x, y, z, m;
-
-    @Override
-    public void visit(GeometryValueVisitor visitor) {
-      visitor.visitPointValue(this);
-    }
-
-  }
 
 }

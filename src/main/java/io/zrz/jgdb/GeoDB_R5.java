@@ -16,18 +16,18 @@ import lombok.Value;
 
 final class GeoDB_R5 extends AbstractGeoDB {
 
-  private static final int MIN_FEATURE_TABLE_ID = 0x3E;
+  // private static final int MIN_FEATURE_TABLE_ID = 0x3E;
 
   private static final int GDB_SystemCatalog_ID = 0x1;
-  private static final int GDB_DBTune_ID = 0x2;
-  private static final int GDB_SpatialRefs_ID = 0x3;
-  private static final int GDB_Release_ID = 0x4;
-  private static final int GDB_FeatureDataset_ID = 0x5;
-  private static final int GDB_ObjectClasses_ID = 0x6;
-  private static final int GDB_FeatureClasses_ID = 0x7;
-  private static final int GDB_FieldInfo_ID = 0x8;
-
-  private static final int MIN_SYSTEM_TABLE = 36;
+  // private static final int GDB_DBTune_ID = 0x2;
+  // private static final int GDB_SpatialRefs_ID = 0x3;
+  // private static final int GDB_Release_ID = 0x4;
+  // private static final int GDB_FeatureDataset_ID = 0x5;
+  // private static final int GDB_ObjectClasses_ID = 0x6;
+  // private static final int GDB_FeatureClasses_ID = 0x7;
+  // private static final int GDB_FieldInfo_ID = 0x8;
+  //
+  // private static final int MIN_SYSTEM_TABLE = 36;
 
   private static final int TABLE_VERSION = 4;
 
@@ -42,13 +42,12 @@ final class GeoDB_R5 extends AbstractGeoDB {
   @Override
   protected void openCatalog() {
 
-    
     // first, build the names and mappings.
 
-    GeoFeatureTable index = this.openTable(GDB_SystemCatalog_ID, TABLE_VERSION);
+    GeoTable index = this.openTable(GDB_SystemCatalog_ID, TABLE_VERSION);
 
     // fetch all of the non system tables.
-    index.scan((feature) -> {
+    index.forEach((feature) -> {
       this.catalog.put(feature.getValue(0).stringValue(), feature.getFeatureId());
     });
 
@@ -60,58 +59,20 @@ final class GeoDB_R5 extends AbstractGeoDB {
 
   }
 
-
-  public GeoFeatureTable table(String name) {
+  @Override
+  public GeoTable layer(String name) {
     Long fid = this.catalog.get(name);
     if (fid == null) {
       throw new IllegalArgumentException(name);
     }
-    return GeoFeatureTable.open(this, fid);
+    return GeoTable.open(this, fid);
   }
 
-  private void dump(String tableName) {
-    dump(this.catalog.get(tableName));
-  }
-
-  public void dump(final long tableid) {
-
-    try (final GeoFeatureTable table = GeoFeatureTable.open(this, tableid)) {
-
-      if (table != null) {
-
-        table.getFields().forEach(field -> System.err.println(field));
-
-        table.scan((feature) -> {
-
-          System.err.println(String.format("FEATURE[%d] = ", feature.getFeatureId()));
-
-          for (int i = 0; i < feature.getFields().size(); ++i) {
-
-            System.err.print(String.format("  %s = ", feature.getFields().get(i).getName()));
-
-            GeoFieldValue value = feature.getValue(i);
-
-            if (value.isNulled()) {
-              System.err.println("(null)");
-            } else {
-              System.err.println(value.toString().substring(0, Math.min(1000, value.toString().length())));
-            }
-
-          }
-
-        });
-
-      }
-
-    }
-
-  }
-
-  public GeoFeatureTable getFeatureTableByLayerId(final int layer) {
+  public GeoTable getFeatureTableByLayerId(final int layer) {
     return null;
   }
 
-  public List<String> getFeatureTables() {
+  public List<String> getLayers() {
     return this.catalog.entrySet().stream()
         // .filter(e -> e.getValue() >= MIN_FEATURE_TABLE_ID)
         .filter(e -> this.tableExists(e.getValue()))
@@ -127,8 +88,8 @@ final class GeoDB_R5 extends AbstractGeoDB {
   }
 
   @Override
-  public VersionFormat getVersion() {
-    return VersionFormat.V10;
+  public FileGDBVersion getVersion() {
+    return FileGDBVersion.V10;
   }
 
   @Value
@@ -152,9 +113,9 @@ final class GeoDB_R5 extends AbstractGeoDB {
 
     public V10_Items(AbstractGeoDB db) {
 
-      try (GeoFeatureTable table = table("GDB_Items")) {
+      try (GeoTable table = layer("GDB_Items")) {
 
-        table.scan(new RowConsumer() {
+        table.forEach(new RowConsumer() {
 
           @Override
           public void accept(GeoFeature feature) {

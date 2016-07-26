@@ -10,9 +10,9 @@ package io.zrz.jgdb;
 public class GeoLayerFeatures {
 
   private String name;
-  private GeoFeatureTable table;
+  private GeoTable table;
 
-  public GeoLayerFeatures(String name, GeoFeatureTable table) {
+  public GeoLayerFeatures(String name, GeoTable table) {
     this.name = name;
     this.table = table;
   }

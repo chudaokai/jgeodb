@@ -14,7 +14,7 @@ import java.util.Optional;
  *
  */
 
-public class GeoDBFactory {
+public class FileGDBFactory {
 
 
   

@@ -3,9 +3,9 @@ package io.zrz.jgdb;
 import java.util.List;
 
 /**
- * An instance of a GeoDB.
+ * An real-only instance of a GeoDB.
  * 
- * @author Theo Zourzouvillys
+ * @author Theo Zourzouvillys <theo@zrz.io>
  *
  */
 
@@ -16,22 +16,26 @@ public interface GeoDB extends AutoCloseable {
    * (binary representation 4) and V10 (binary representation 5).
    */
 
-  VersionFormat getVersion();
+  FileGDBVersion getVersion();
 
   /**
    * Each of the layers.
    */
 
-  List<String> getFeatureTables();
+  List<String> getLayers();
 
   /**
-   * Fetches a feature table by it's name.
+   * Fetches a layer by it's name.
    * 
-   * @param name
-   * @return
+   * A layer will be kept open until the database is closed. If you prefer to
+   * close it to release resources, use GeoLayer#close().
+   * 
+   * The implementation uses mmap(), and very little (real) memory on a per
+   * layer basis, so you most likely don't need to.
+   * 
    */
 
-  GeoFeatureTable table(String name);
+  GeoLayer layer(String name);
 
   /**
    * 

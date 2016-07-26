@@ -7,22 +7,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import io.zrz.jgdb.GeoTableFile.Field;
-
-public class GeoFeatureTable implements AutoCloseable {
+public class GeoTable implements AutoCloseable, GeoLayer {
 
   private final AbstractGeoDB db;
   private final long id;
-  private GeoTableFile table;
+  private FileGDBTable table;
   private GeoIndexFile index;
 
-  GeoFeatureTable(final AbstractGeoDB db, final long id) {
+  GeoTable(final AbstractGeoDB db, final long id) {
     this.db = db;
     this.id = id;
   }
 
-  public long getTableId() {
-    return this.id;
+  public int getTableId() {
+    return (int) this.id;
   }
 
   public int getVersion() {
@@ -39,7 +37,7 @@ public class GeoFeatureTable implements AutoCloseable {
 
     // open the table itself.
     try {
-      this.table = new GeoTableFile(file);
+      this.table = new FileGDBTable(file);
     } catch (final IOException e) {
       this.close();
       throw new GeoDBException(e);
@@ -65,6 +63,7 @@ public class GeoFeatureTable implements AutoCloseable {
    * @return
    */
 
+  @Override
   public GeoFeature getFeature(final int featureId) {
     final int offset = this.index.getFeatureOffset(featureId - 1);
     if (offset == -1) {
@@ -87,27 +86,27 @@ public class GeoFeatureTable implements AutoCloseable {
 
   }
 
-  public void scan(final RowConsumer feature) {
-    this.index.scan(rowid -> true, (objid, offset) -> feature.accept(GeoFeatureTable.this.table.getRow(objid, offset)));
+  
+  
+  @Override
+  public void forEach(final Predicate<Long> acceptor, final RowConsumer feature) {
+    this.index.scan(acceptor, (objid, offset) -> feature.accept(GeoTable.this.table.getRow(objid, offset)));
   }
 
-  public void scan(final Predicate<Long> acceptor, final RowConsumer feature) {
-    this.index.scan(acceptor, (objid, offset) -> feature.accept(GeoFeatureTable.this.table.getRow(objid, offset)));
+  @Override
+  public int getFeatureCount() {
+    return (int) this.table.getRowCount();
   }
 
-  public long getFeatureCount() {
-    return this.table.getRowCount();
-  }
-
-  public List<Field> getFields() {
+  public List<GeoField> getFields() {
     return this.table.getFields();
   }
 
-  public Field getField(int id) {
+  public GeoField getField(int id) {
     return table.getFields().get(id);
   }
 
-  public Field getField(String name) {
+  public GeoField getField(String name) {
     return table.getFields().get(getFieldId(name));
   }
 
@@ -119,7 +118,7 @@ public class GeoFeatureTable implements AutoCloseable {
    * 
    */
 
-  public Optional<Field> getFeatureIdField() {
+  public Optional<GeoField> getFeatureIdField() {
     return this.table.getFields().stream().filter(a -> a.getName().toLowerCase().equals("objid")).findAny();
   }
 
@@ -127,7 +126,7 @@ public class GeoFeatureTable implements AutoCloseable {
    * 
    */
 
-  public Optional<Field> getShapeField() {
+  public Optional<GeoField> getShapeField() {
     return this.table.getFields().stream().filter(a -> a.getName().toLowerCase().equals("shape")).findAny();
   }
 
@@ -138,8 +137,8 @@ public class GeoFeatureTable implements AutoCloseable {
    * @return
    */
 
-  static GeoFeatureTable open(final AbstractGeoDB db, final long idx) {
-    final GeoFeatureTable table = new GeoFeatureTable(db, idx);
+  static GeoTable open(final AbstractGeoDB db, final long idx) {
+    final GeoTable table = new GeoTable(db, idx);
     if (!table.open()) {
       return null;
     }

@@ -1,7 +1,4 @@
-package io.zrz.jgdb;
-
-import io.zrz.jgdb.GeoTableFile.MultiPoint;
-import io.zrz.jgdb.GeometryValue.PointValue;
+package io.zrz.jgdb.shape;
 
 public interface GeometryValueVisitor {
 

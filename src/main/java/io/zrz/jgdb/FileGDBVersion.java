@@ -1,5 +1,5 @@
 package io.zrz.jgdb;
 
-public enum VersionFormat {
+public enum FileGDBVersion {
   V9, V10
 }

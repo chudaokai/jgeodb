@@ -5,13 +5,11 @@ import java.util.UUID;
 
 import org.w3c.dom.Document;
 
-import io.zrz.jgdb.GeoTableFile.Field;
-
 public class GeoFieldValue {
 
   private Object value;
 
-  public GeoFieldValue(Field field, Object value) {
+  public GeoFieldValue(GeoField field, Object value) {
     this.value = value;
   }
 

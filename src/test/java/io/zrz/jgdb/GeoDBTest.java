@@ -6,16 +6,13 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import io.zrz.jgdb.GeoTableFile.Field;
-import io.zrz.jgdb.GeoTableFile.GeometryFieldType;
-
 public class GeoDBTest {
 
   private void dumpTable(GeoDB db, String tableName) {
 
     System.err.println(tableName);
 
-    GeoFeatureTable table = db.table(tableName);
+    GeoLayer table = db.layer(tableName);
 
     System.err.println(String.format("  Table ID: 0x%x", table.getTableId()));
     System.err.println(String.format("  Feature Count: %d", table.getFeatureCount()));
@@ -42,16 +39,16 @@ public class GeoDBTest {
 
     }
 
-    for (Field field : table.getFields()) {
+    for (GeoField field : table.getFields()) {
       if (field != table.getShapeField().orElse(null))
         System.err.println(String.format("  %s = %s", field.getName(), field.getType()));
     }
 
-    table.scan(row -> {
+    table.forEach(row -> {
 
       System.err.println(String.format("  %s:%d", tableName, row.getFeatureId()));
 
-      for (Field field : row.getFields()) {
+      for (GeoField field : row.getFields()) {
         if (field != table.getShapeField().orElse(null))
           System.err.println(String.format("    %s = %s", field.getName(), row.getValue(field.getName())));
       }
@@ -73,15 +70,15 @@ public class GeoDBTest {
 
       System.err.println(String.format("  Layer: %s", tableName));
 
-      GeoFeatureTable table = db.table(tableName);
+      GeoLayer layer = db.layer(tableName);
 
-      System.err.println(String.format("  Table ID: 0x%x", table.getTableId()));
+      System.err.println(String.format("  Table ID: 0x%x", layer.getTableId()));
 
-      System.err.println(String.format("  Feature Count: %d", table.getFeatureCount()));
+      System.err.println(String.format("  Feature Count: %d", layer.getFeatureCount()));
 
-      if (table.getShapeField().isPresent()) {
+      if (layer.getShapeField().isPresent()) {
 
-        GeometryFieldType geo = ((GeometryFieldType) table.getField("Shape").getType());
+        GeometryFieldType geo = ((GeometryFieldType) layer.getField("Shape").getType());
 
         System.err.println("  Layer SRS WKT: " + geo.getWkt());
 
@@ -91,12 +88,12 @@ public class GeoDBTest {
 
       }
 
-      for (Field field : table.getFields()) {
-        if (field != table.getShapeField().orElse(null))
+      for (GeoField field : layer.getFields()) {
+        if (field != layer.getShapeField().orElse(null))
           System.err.println(String.format("  %s = %s", field.getName(), field.getType()));
       }
 
-      table.scan(row -> {
+      layer.forEach(row -> {
 
       });
 
@@ -118,15 +115,15 @@ public class GeoDBTest {
   @Test
   public void testOpenV9() {
 
-    final GeoDB db = GeoDBFactory.open(Paths.get("/tmp/UT_CadNSDI.gdb"));
+    final GeoDB db = FileGDBFactory.open(Paths.get("/tmp/UT_CadNSDI.gdb"));
 
-    assertEquals(VersionFormat.V9, db.getVersion());
+    assertEquals(FileGDBVersion.V9, db.getVersion());
 
     // dumpTable(db, "MeanderedWater");
 
     dumpTable(db, "LU_PrincipalMeridian");
 
-    for (String tableName : db.getFeatureTables()) {
+    for (String tableName : db.getLayers()) {
       scanTable(db, tableName);
     }
 
@@ -134,23 +131,23 @@ public class GeoDBTest {
 
   @Test
   public void testOpenV10_0() {
-    final GeoDB db = GeoDBFactory.open(Paths.get("/tmp/UtahPLSS_Fabric_D5_FR_021916.gdb"));
-    assertEquals(VersionFormat.V10, db.getVersion());
+    final GeoDB db = FileGDBFactory.open(Paths.get("/tmp/UtahPLSS_Fabric_D5_FR_021916.gdb"));
+    assertEquals(FileGDBVersion.V10, db.getVersion());
     dumpTable(db, "Utah_Parcel_Fabric_History");
   }
 
   @Test
   public void testOpenV10_1() {
 
-    final GeoDB db = GeoDBFactory.open(Paths.get("/tmp/tlgdb_2015_a_us_school.gdb"));
+    final GeoDB db = FileGDBFactory.open(Paths.get("/tmp/tlgdb_2015_a_us_school.gdb"));
 
-    db.getFeatureTables().forEach(System.err::println);
+    db.getLayers().forEach(System.err::println);
 
-    assertEquals(VersionFormat.V10, db.getVersion());
+    assertEquals(FileGDBVersion.V10, db.getVersion());
 
     // scanTable(db, "School_District_Unified");
 
-    for (String tableName : db.getFeatureTables()) {
+    for (String tableName : db.getLayers()) {
       scanTable(db, tableName);
     }
   }
@@ -158,9 +155,9 @@ public class GeoDBTest {
   @Test
   public void testOpenV10_2() {
 
-    final GeoDB db = GeoDBFactory.open(Paths.get("/tmp/UtahPLSS_Fabric_D5_FR_021916.gdb"));
+    final GeoDB db = FileGDBFactory.open(Paths.get("/tmp/UtahPLSS_Fabric_D5_FR_021916.gdb"));
 
-    assertEquals(VersionFormat.V10, db.getVersion());
+    assertEquals(FileGDBVersion.V10, db.getVersion());
 
     // GeoFeatureTable table = db.table("Utah_Parcel_Fabric_Lines");
 
@@ -169,7 +166,7 @@ public class GeoDBTest {
     // scanTable(db, "Utah_Parcel_Fabric_Parcels");
     // scanTable(db, "Utah_Parcel_Fabric_Lines");
 
-    for (String tableName : db.getFeatureTables()) {
+    for (String tableName : db.getLayers()) {
       scanTable(db, tableName);
     }
 

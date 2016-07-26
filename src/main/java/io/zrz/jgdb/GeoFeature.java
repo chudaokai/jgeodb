@@ -2,7 +2,6 @@ package io.zrz.jgdb;
 
 import java.util.List;
 
-import io.zrz.jgdb.GeoTableFile.Field;
 import lombok.Builder;
 import lombok.Singular;
 
@@ -17,7 +16,7 @@ public class GeoFeature {
 
   private long featureId;
 
-  private List<Field> fields;
+  private List<GeoField> fields;
 
   @Singular
   private List<Object> values;
@@ -43,7 +42,7 @@ public class GeoFeature {
     return featureId;
   }
 
-  public List<Field> getFields() {
+  public List<GeoField> getFields() {
     return this.fields;
   }
 
