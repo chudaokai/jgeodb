@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import io.zrz.jgdb.shape.GeometryValue;
 import lombok.Builder;
 import lombok.Value;
 
@@ -104,7 +105,7 @@ final class GeoDB_R5 extends AbstractGeoDB {
     private String datasetInfo1;
     private String datasetInfo2;
     private int properties;
-    private String shape;
+    private GeometryValue shape;
   }
 
   class V10_Items {

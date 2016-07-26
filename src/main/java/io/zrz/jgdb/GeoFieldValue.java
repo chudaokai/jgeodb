@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.w3c.dom.Document;
 
+import io.zrz.jgdb.shape.GeometryValue;
+
 public class GeoFieldValue {
 
   private Object value;
@@ -74,8 +76,8 @@ public class GeoFieldValue {
 
   //
 
-  public String geometryValue() {
-    return null;
+  public GeometryValue geometryValue() {
+    return (GeometryValue)this.value;
   }
 
   //
