@@ -4,12 +4,19 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.function.Predicate;
 
+import io.zrz.jgdb.GeoIndexFile.IndexEntry;
 import lombok.Builder;
 import lombok.Value;
 
-public class GeoIndexFile {
+public class GeoIndexFile implements Iterable<IndexEntry> {
+
+  @Value
+  public static class IndexEntry {
+    private final long objectId, offset;
+  }
 
   @Builder
   @Value
@@ -34,7 +41,7 @@ public class GeoIndexFile {
   private BitSet blockmap;
 
   public GeoIndexFile(final Path path) throws IOException {
-    
+
     this.file = new RandomAccessFile(path.toFile(), "r");
     this.reader = new GeoMappedFileBuffer(this.file, file.length());
     this.header = this.readHeader();
@@ -182,7 +189,7 @@ public class GeoIndexFile {
   }
 
   private int readIndexAt(int id) {
-    
+
     int pos = (16 + id * this.header.getSizeOffset());
 
     reader.seek(pos);
@@ -204,8 +211,10 @@ public class GeoIndexFile {
 
     }
 
-    if (offset <= 0 || offset >= Integer.MAX_VALUE) {
+    if (offset == 0) {
       return -1;
+    } else if (offset < 0 || offset >= Integer.MAX_VALUE) {
+      throw new IllegalArgumentException(String.format("Invalid offset: %d", offset));
     }
 
     return (int) offset;
@@ -217,6 +226,94 @@ public class GeoIndexFile {
     } catch (final IOException e) {
       // nothing ..
     }
+  }
+
+  @Override
+  public Iterator<IndexEntry> iterator() {
+    return new IndexIterator();
+  }
+
+  private class IndexIterator implements Iterator<IndexEntry> {
+
+    private IndexEntry next = null;
+    private int id = 0;
+    private int missing = 0;
+    private boolean eof = false;
+
+    @Override
+    public boolean hasNext() {
+
+      if (eof) {
+        return false;
+      }
+
+      if (this.next == null) {
+        this.next = position();
+        if (this.next == null) {
+          this.eof = true;
+          return false;
+        }
+      }
+
+      return this.next != null;
+
+    }
+
+    @Override
+    public IndexEntry next() {
+
+      try {
+
+        if (this.next != null) {
+          return this.next;
+        }
+
+        this.next = position();
+
+        if (this.next == null) {
+          this.eof = true;
+        }
+
+        return this.next;
+
+      } finally {
+        
+        this.next = null;
+        
+      }
+
+    }
+
+    private IndexEntry position() {
+
+      while (id < header.getNumberOfRows()) {
+
+        if (blockmap != null) {
+
+          int iBlock = id / 1024;
+
+          if (!blockmap.get(iBlock)) {
+            id += 1024;
+            missing += 1024;
+            continue;
+          }
+
+        }
+
+        long offset = readIndexAt(id - missing);
+
+        ++id;
+
+        if (offset >= 0) {
+          return new IndexEntry(id, offset);
+        }
+
+      }
+
+      return null;
+
+    }
+
   }
 
 }

@@ -36,7 +36,7 @@ public class FileGDBTable {
 
   private Integer fidId;
   private Integer shapeId;
-  
+
   private GeoMappedFileBuffer file;
 
   /**
@@ -198,7 +198,7 @@ public class FileGDBTable {
             ib.width(width);
             ib.nullable((flags & 1) == 1);
             b.type(ib.build());
-            ib.defaultValue(0);
+            // ib.defaultValue(0);
             break;
           }
           case 1: {
@@ -206,7 +206,7 @@ public class FileGDBTable {
             ib.width(width);
             ib.nullable((flags & 1) == 1);
             b.type(ib.build());
-            ib.defaultValue(0);
+            // ib.defaultValue(0);
             break;
           }
           case 2: {
@@ -214,7 +214,7 @@ public class FileGDBTable {
             ib.width(width);
             ib.nullable((flags & 1) == 1);
             b.type(ib.build());
-            ib.defaultValue(0);
+            // ib.defaultValue(0);
             break;
           }
           case 3: {
@@ -222,7 +222,7 @@ public class FileGDBTable {
             ib.width(width);
             ib.nullable((flags & 1) == 1);
             b.type(ib.build());
-            ib.defaultValue(0);
+            // ib.defaultValue(0);
             break;
           }
           case 5: {
@@ -230,7 +230,7 @@ public class FileGDBTable {
             ib.width(width);
             ib.nullable((flags & 1) == 1);
             b.type(ib.build());
-            ib.defaultValue(0);
+            // ib.defaultValue(0);
             break;
           }
           default:
@@ -539,7 +539,7 @@ public class FileGDBTable {
         throw new RuntimeException(e);
       }
     } catch (Exception ex) {
-      throw new GeoDBException(String.format("While processing FID %d", featureId), ex);
+      throw new GeoDBException(String.format("While processing FID %d at offset %d", featureId, offset), ex);
     }
 
   }

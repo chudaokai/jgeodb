@@ -20,6 +20,9 @@ public class GeoFieldValue {
   }
 
   public String stringValue() {
+    if (value == null) {
+      return null;
+    }
     return this.value.toString();
   }
 
@@ -45,6 +48,9 @@ public class GeoFieldValue {
   }
 
   public int intValue() {
+    if (this.value == null) {
+      return 0;
+    }
     if (Long.TYPE.equals(this.value.getClass()))
       return (int) ((long) this.value);
     if (Long.class.equals(this.value.getClass()))
@@ -65,6 +71,8 @@ public class GeoFieldValue {
   //
 
   public double doubleValue() {
+    if (this.value == null)
+      return Double.NaN;
     return (double) this.value;
   }
 
@@ -77,7 +85,7 @@ public class GeoFieldValue {
   //
 
   public GeometryValue geometryValue() {
-    return (GeometryValue)this.value;
+    return (GeometryValue) this.value;
   }
 
   //
@@ -87,6 +95,13 @@ public class GeoFieldValue {
       return this.value.toString();
     }
     return "(null)";
+  }
+
+  public String stringValue(String defaultValue) {
+    if (value == null) {
+      return defaultValue;
+    }
+    return this.value.toString();
   }
 
 }

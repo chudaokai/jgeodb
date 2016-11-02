@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
+// note: tests need unzipped FileGDBs in /tmp.
+
 public class GeoDBTest {
 
   private void dumpTable(GeoDB db, String tableName) {
@@ -14,7 +16,7 @@ public class GeoDBTest {
 
     GeoLayer table = db.layer(tableName);
 
-    System.err.println(String.format("  Table ID: 0x%x", table.getTableId()));
+    //System.err.println(String.format("  Table ID: 0x%x", table.getTableId()));
     System.err.println(String.format("  Feature Count: %d", table.getFeatureCount()));
 
     if (table.getShapeField().isPresent()) {
@@ -72,7 +74,7 @@ public class GeoDBTest {
 
       GeoLayer layer = db.layer(tableName);
 
-      System.err.println(String.format("  Table ID: 0x%x", layer.getTableId()));
+//      System.err.println(String.format("  Table ID: 0x%x", layer.getTableId()));
 
       System.err.println(String.format("  Feature Count: %d", layer.getFeatureCount()));
 

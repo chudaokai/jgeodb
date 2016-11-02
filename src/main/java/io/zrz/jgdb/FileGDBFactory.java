@@ -16,9 +16,6 @@ import java.util.Optional;
 
 public class FileGDBFactory {
 
-
-  
-
   /**
    * Fetches the version of the GDB.
    * 

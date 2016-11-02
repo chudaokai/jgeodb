@@ -165,7 +165,7 @@ public class GeometryFieldType implements FieldType {
     }
 
     // -- the bounding box for the feature.
-    
+
     // varuint: xmin = varuint / xyscale + xorigin
     double xmin = buffer.readVarUInt64() / xyscale + xorigin;
 
@@ -294,6 +294,11 @@ public class GeometryFieldType implements FieldType {
   @Override
   public Object getDefaultValue() {
     return null;
+  }
+
+  @Override
+  public <R> R apply(Object object, GeoValueVisitor<R> converter) {
+    return converter.visitGeometry((GeometryValue) object);
   }
 
 }

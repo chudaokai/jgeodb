@@ -2,5 +2,6 @@
 .project
 .gradle
 .settings
+build
 gradle
 bin

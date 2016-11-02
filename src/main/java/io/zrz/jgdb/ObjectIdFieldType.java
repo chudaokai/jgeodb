@@ -4,7 +4,8 @@ import java.io.IOException;
 
 import lombok.ToString;
 
-@ToString class ObjectIdFieldType implements FieldType {
+@ToString
+class ObjectIdFieldType implements FieldType {
 
   public static final ObjectIdFieldType INSTANCE = new ObjectIdFieldType();
 
@@ -25,6 +26,11 @@ import lombok.ToString;
   @Override
   public Object getDefaultValue() {
     return null;
+  }
+
+  @Override
+  public <R> R apply(Object object, GeoValueVisitor<R> converter) {
+    throw new RuntimeException();
   }
 
 }

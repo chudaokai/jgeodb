@@ -10,4 +10,6 @@ interface FieldType {
 
   Object getDefaultValue();
 
+  <R> R apply(Object object, GeoValueVisitor<R> converter);
+
 }

@@ -23,4 +23,9 @@ import lombok.Value;
     return null;
   }
 
+  @Override
+  public <R> R apply(Object object, GeoValueVisitor<R> converter) {
+    return converter.visitBinary((byte[])object);
+  }
+
 }

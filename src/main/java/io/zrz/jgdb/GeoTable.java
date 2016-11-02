@@ -3,9 +3,11 @@ package io.zrz.jgdb;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
+
+import io.zrz.jgdb.GeoIndexFile.IndexEntry;
 
 public class GeoTable implements AutoCloseable, GeoLayer {
 
@@ -86,13 +88,6 @@ public class GeoTable implements AutoCloseable, GeoLayer {
 
   }
 
-  
-  
-  @Override
-  public void forEach(final Predicate<Long> acceptor, final RowConsumer feature) {
-    this.index.scan(acceptor, (objid, offset) -> feature.accept(GeoTable.this.table.getRow(objid, offset)));
-  }
-
   @Override
   public int getFeatureCount() {
     return (int) this.table.getRowCount();
@@ -143,6 +138,38 @@ public class GeoTable implements AutoCloseable, GeoLayer {
       return null;
     }
     return table;
+  }
+  
+  /**
+   * 
+   */
+
+  @Override
+  public Iterator<GeoFeature> iterator() {
+
+    return new Iterator<GeoFeature>() {
+
+      private final Iterator<IndexEntry> it = index.iterator();
+
+      @Override
+      public boolean hasNext() {
+        return it.hasNext();
+      }
+
+      @Override
+      public GeoFeature next() {
+        
+        final IndexEntry next = it.next();
+        
+        if (next == null) {
+          return null;
+        }
+        
+        return table.getRow(next.getObjectId(), next.getOffset());
+      }
+
+    };
+
   }
 
 }

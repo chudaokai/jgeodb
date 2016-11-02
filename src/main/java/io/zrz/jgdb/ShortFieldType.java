@@ -10,7 +10,7 @@ import lombok.Value;
 
   private boolean nullable;
   private int width;
-  private long defaultValue;
+  private Short defaultValue;
 
   @Override
   public Object read(GeoBuffer file) throws IOException {
@@ -21,5 +21,11 @@ import lombok.Value;
   public Object getDefaultValue() {
     return defaultValue;
   }
+  
+  @Override
+  public <R> R apply(Object object, GeoValueVisitor<R> converter) {
+    return converter.visitShort((short)object);
+  }
+
 
 }

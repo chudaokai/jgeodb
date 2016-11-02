@@ -56,4 +56,10 @@ class XmlFieldType implements FieldType {
     return defaultValue;
   }
 
+  @Override
+  public <R> R apply(Object object, GeoValueVisitor<R> converter) {
+    return converter.visitXml((Document)object);
+  }
+
+
 }

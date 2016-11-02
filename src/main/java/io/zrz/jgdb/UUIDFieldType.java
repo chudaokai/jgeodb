@@ -35,4 +35,9 @@ public class UUIDFieldType implements FieldType {
     return null;
   }
 
+  @Override
+  public <R> R apply(Object object, GeoValueVisitor<R> converter) {
+    return converter.visitUUID((UUID)object);
+  }
+
 }

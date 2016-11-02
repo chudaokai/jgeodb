@@ -84,7 +84,7 @@ final class GeoDB_R4 extends AbstractGeoDB {
 
     // build the names and mappings.
     GeoTable index = this.openTable(GDB_SystemCatalog_ID, TABLE_VERSION);
-
+    
     index.forEach((feature) -> {
 
       if (!this.tableExists(feature.getFeatureId())) {
