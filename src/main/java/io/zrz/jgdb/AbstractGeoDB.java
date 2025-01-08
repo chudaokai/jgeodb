@@ -3,9 +3,7 @@ package io.zrz.jgdb;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +31,7 @@ abstract class AbstractGeoDB implements GeoDB {
    * tables that are currently open.
    */
 
-  private Set<GeoTable> opened = new HashSet<>();
+  private Map<Long, GeoTable> opened = new HashMap<>();
 
   /**
    * 
@@ -101,7 +99,7 @@ abstract class AbstractGeoDB implements GeoDB {
   @Override
   public final void close() {
     // copy open set, then close them all.
-    new HashSet<>(this.opened).forEach(table -> table.close());
+    this.opened.values().forEach(GeoTable::close);
   }
 
   /**
@@ -122,16 +120,26 @@ abstract class AbstractGeoDB implements GeoDB {
    */
 
   protected GeoTable openTable(long tableId, int tableVersion) {
-    final GeoTable index = GeoTable.open(this, tableId);
+    final GeoTable index = openTable(tableId);
     if (index.getVersion() != tableVersion) {
+      index.close();
+      closed(tableId);
       throw new IllegalArgumentException(String.format("Unexpected Table Version: %d", index.getVersion()));
     }
-    this.opened.add(index);
     return index;
   }
 
-  public void closed(GeoTable table) {
-    this.opened.remove(table);
+  protected GeoTable openTable(long tableId){
+    if(this.opened.containsKey(tableId)){
+      return this.opened.get(tableId);
+    }
+    final GeoTable index = GeoTable.open(this, tableId);
+    this.opened.put(tableId, index);
+    return index;
+  }
+
+  public void closed(long id) {
+    this.opened.remove(id);
   }
 
 }

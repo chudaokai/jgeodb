@@ -313,6 +313,7 @@ public class FileGDBTable {
           byte[] data = new byte[wktlen];
           file.readFully(data);
           String wkt = new String(data, StandardCharsets.UTF_8);
+          wkt = wkt.replace("\0", "");
           sb.wkt(wkt);
         }
 

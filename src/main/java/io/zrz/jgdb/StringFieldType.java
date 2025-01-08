@@ -1,6 +1,7 @@
 package io.zrz.jgdb;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import lombok.Builder;
 import lombok.Value;
@@ -25,7 +26,7 @@ class StringFieldType implements FieldType {
     byte data[] = new byte[clen];
     file.readFully(data);
 
-    String str = new String(data);
+    String str = new String(data, StandardCharsets.UTF_8);
     return str;
 
   }

@@ -2,10 +2,7 @@ package io.zrz.jgdb;
 
 import java.io.IOException;
 
-import io.zrz.jgdb.shape.GeometryValue;
-import io.zrz.jgdb.shape.MultiPoint;
-import io.zrz.jgdb.shape.Point;
-import io.zrz.jgdb.shape.PointValue;
+import io.zrz.jgdb.shape.*;
 import lombok.Builder;
 import lombok.Value;
 
@@ -133,14 +130,23 @@ public class GeometryFieldType implements FieldType {
 
   private GeometryValue parsePolyline(ShapeModifiers stype, GeoBuffer cfile, long len) throws IOException {
     // polylines are actually identical to polygons in structure.
-    return parsePolygon(stype, cfile, len);
+    LineString geom = new LineString();
+    parseMultiPoint(geom, stype, cfile, len);
+    return geom;
+  }
+
+  private GeometryValue parsePolygon(ShapeModifiers stype, GeoBuffer cfile, long len) throws IOException {
+    // polylines are actually identical to polygons in structure.
+    MultiPolygon geom = new MultiPolygon();
+    parseMultiPoint(geom, stype, cfile, len);
+    return geom;
   }
 
   /**
    * 
    */
 
-  private GeometryValue parsePolygon(ShapeModifiers stype, GeoBuffer buffer, long len) throws IOException {
+  private void parseMultiPoint(MultiPoint geom, ShapeModifiers stype, GeoBuffer buffer, long len) throws IOException {
 
     // GeoBuffer buffer = new GeoFileBuffer(cfile, len);
 
@@ -149,7 +155,7 @@ public class GeometryFieldType implements FieldType {
     if (npoints < 0 || npoints > (50 * 1000 * 1000)) {
       throw new IllegalArgumentException();
     } else if (npoints == 0) {
-      return null;
+      return;
     }
 
     // varuint: number of parts, i.e. number of rings for (multi)polygon -
@@ -178,8 +184,7 @@ public class GeometryFieldType implements FieldType {
     // varuint: ymax = varuint / xyscale + ymin
     double ymax = buffer.readVarUInt64() / xyscale + yorigin;
 
-    MultiPoint parts = new MultiPoint();
-    parts.points = new Point[ngeoms];
+    geom.points = new Point[ngeoms];
     int remain = npoints;
 
     //
@@ -194,30 +199,30 @@ public class GeometryFieldType implements FieldType {
         throw new GeoDBException(String.format("Invalid number of points: %d", remain));
       }
 
-      parts.points[i] = new Point();
-      parts.points[i].x = new double[pointsperpart];
-      parts.points[i].y = new double[pointsperpart];
+      geom.points[i] = new Point();
+      geom.points[i].x = new double[pointsperpart];
+      geom.points[i].y = new double[pointsperpart];
 
       if (stype.hasZ()) {
-        parts.points[i].z = new double[pointsperpart];
+        geom.points[i].z = new double[pointsperpart];
       }
 
       if (stype.hasM()) {
-        parts.points[i].m = new double[pointsperpart];
+        geom.points[i].m = new double[pointsperpart];
       }
 
     }
 
-    parts.points[ngeoms - 1] = new Point();
-    parts.points[ngeoms - 1].x = new double[remain];
-    parts.points[ngeoms - 1].y = new double[remain];
+    geom.points[ngeoms - 1] = new Point();
+    geom.points[ngeoms - 1].x = new double[remain];
+    geom.points[ngeoms - 1].y = new double[remain];
 
     if (stype.hasZ()) {
-      parts.points[ngeoms - 1].z = new double[remain];
+      geom.points[ngeoms - 1].z = new double[remain];
     }
 
     if (stype.hasM()) {
-      parts.points[ngeoms - 1].m = new double[remain];
+      geom.points[ngeoms - 1].m = new double[remain];
     }
 
     // --
@@ -227,7 +232,7 @@ public class GeometryFieldType implements FieldType {
 
     for (int i = 0; i < ngeoms; ++i) {
 
-      Point point = parts.points[i];
+      Point point = geom.points[i];
 
       for (int x = 0; x < point.x.length; ++x) {
 
@@ -249,7 +254,7 @@ public class GeometryFieldType implements FieldType {
     if (stype.hasZ()) {
       long dz = 0;
       for (int i = 0; i < ngeoms; ++i) {
-        Point point = parts.points[i];
+        Point point = geom.points[i];
         for (int x = 0; x < point.x.length; ++x) {
           long vi = buffer.readVarInt64();
           dz += vi;
@@ -261,7 +266,7 @@ public class GeometryFieldType implements FieldType {
     if (stype.hasM()) {
       long dm = 0;
       for (int i = 0; i < ngeoms; ++i) {
-        Point point = parts.points[i];
+        Point point = geom.points[i];
         for (int x = 0; x < point.x.length; ++x) {
           long vi = buffer.readVarInt64();
           dm += vi;
@@ -286,8 +291,6 @@ public class GeometryFieldType implements FieldType {
       }
 
     }
-
-    return parts;
 
   }
 

@@ -39,11 +39,16 @@ public interface GeoLayer extends Iterable<GeoFeature> {
   GeoField getField(String string);
 
   /**
+   * Returns true if this layer has a geometry field.
+   * @return
+   */
+  boolean hasGeometry();
+  /**
    * The field which defines the shape of feature in this layer, if there is
    * one.
    */
 
-  Optional<GeoField> getShapeField();
+  GeoField getShapeField();
 
   /**
    * All of the fields defined for this table.

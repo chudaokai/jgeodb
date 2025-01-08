@@ -84,7 +84,7 @@ public class GeoTable implements AutoCloseable, GeoLayer {
       this.index.close();
       this.index = null;
     }
-    this.db.closed(this);
+    this.db.closed(this.id);
 
   }
 
@@ -114,15 +114,20 @@ public class GeoTable implements AutoCloseable, GeoLayer {
    */
 
   public Optional<GeoField> getFeatureIdField() {
-    return this.table.getFields().stream().filter(a -> a.getName().toLowerCase().equals("objid")).findAny();
+    return this.table.getFields().stream().filter(a -> "objid".equalsIgnoreCase(a.getName())).findAny();
+  }
+
+  @Override
+  public boolean hasGeometry() {
+    return this.table.getFields().stream().anyMatch(a -> "shape".equalsIgnoreCase(a.getName()));
   }
 
   /**
    * 
    */
 
-  public Optional<GeoField> getShapeField() {
-    return this.table.getFields().stream().filter(a -> a.getName().toLowerCase().equals("shape")).findAny();
+  public GeoField getShapeField() {
+    return this.table.getFields().stream().filter(a ->"shape".equalsIgnoreCase(a.getName())).findAny().orElse(null);
   }
 
   /**

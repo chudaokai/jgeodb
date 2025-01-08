@@ -137,9 +137,19 @@ final class GeoDB_R4 extends AbstractGeoDB {
 
   @Override
   public List<String> getLayers() {
+    return getLayers(null);
+  }
+
+  @Override
+  public List<String> getLayers(String datasetName) {
     return this.userTables.values().stream()
-        .map(item -> item.getTableName())
-        .collect(Collectors.toList());
+            .map(item -> item.getTableName())
+            .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<String> getDatasets() {
+    return getLayers();
   }
 
   @Override

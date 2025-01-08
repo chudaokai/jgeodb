@@ -25,6 +25,18 @@ public interface GeoDB extends AutoCloseable {
   List<String> getLayers();
 
   /**
+   * List layers in a dataset.
+   * @param datasetName name of the dataset.
+   * @return
+   */
+  List<String> getLayers(String datasetName);
+  /**
+   * Each of the datasets.
+   * @return
+   */
+  List<String> getDatasets();
+
+  /**
    * Fetches a layer by it's name.
    * 
    * A layer will be kept open until the database is closed. If you prefer to
