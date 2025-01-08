@@ -90,6 +90,20 @@ final class GeoDB_R5 extends AbstractGeoDB {
     }
 
     @Override
+    public Map<String, List<String>> getLayerTree() {
+        return items.items.entrySet().stream().filter(m->catalog.containsKey(m.getKey())).collect(Collectors.toMap(
+                m->{
+                    String path = m.getValue().getPath();
+                    if(("\\"+m.getKey()).equals(path)){
+                        return "";
+                    }else{
+                        return path.substring(1,path.indexOf('\\',1));
+                    }
+                },m->new ArrayList<String>(){{add(m.getKey());}},(m,n)->{m.addAll(n);return m;}
+        ));
+    }
+
+    @Override
     public List<String> getDatasets() {
         return this.items.items.entrySet().stream().filter(m -> !"workspace".equalsIgnoreCase(m.getValue().physicalName)
                 && !catalog.containsKey(m.getKey())).map(Map.Entry::getKey).collect(Collectors.toList());

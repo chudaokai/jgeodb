@@ -12,6 +12,10 @@ public class UUIDFieldType implements FieldType {
   public static final UUIDFieldType INSTANCE = new UUIDFieldType(false);
   private boolean nullable;
 
+  @Override
+  public Class<?> getJavaType() {
+    return String.class;
+  }
   public UUIDFieldType(boolean nullable) {
     this.nullable = nullable;
   }

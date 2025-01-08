@@ -12,6 +12,10 @@ import lombok.Value;
   private Integer defaultValue;
 
   @Override
+  public Class<?> getJavaType() {
+    return int.class;
+  }
+  @Override
   public Object read(GeoBuffer file) throws IOException {
     return file.readInt32();
   }

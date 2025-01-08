@@ -33,7 +33,7 @@ public class GeoFeature {
 
   public int getFieldId(String name) {
     for (int i = 0; i < fields.size(); ++i) {
-      if (fields.get(i).getName().equals(name)) {
+      if (fields.get(i).getName().equalsIgnoreCase(name)) {
         return i;
       }
     }

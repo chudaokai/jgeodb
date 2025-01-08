@@ -11,6 +11,11 @@ import lombok.Value;
   private boolean nullable;
 
   @Override
+  public Class<?> getJavaType() {
+    return byte[].class;
+  }
+
+  @Override
   public Object read(GeoBuffer file) throws IOException {
     int len = file.readVarUInt32();
     byte data[] = new byte[len];

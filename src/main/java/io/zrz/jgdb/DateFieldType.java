@@ -2,6 +2,7 @@ package io.zrz.jgdb;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Date;
 
 import lombok.Builder;
 import lombok.Value;
@@ -15,7 +16,10 @@ class DateFieldType implements FieldType {
   private boolean nullable;
   private int width;
   private Instant defaultValue;
-
+  @Override
+  public Class<?> getJavaType() {
+    return Date.class;
+  }
   @Override
   public Object read(GeoBuffer file) throws IOException {
     double date = file.readD64();

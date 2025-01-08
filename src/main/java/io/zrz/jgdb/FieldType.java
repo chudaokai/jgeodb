@@ -3,6 +3,7 @@ package io.zrz.jgdb;
 import java.io.IOException;
 
 interface FieldType {
+  Class<?> getJavaType();
 
   boolean isNullable();
 

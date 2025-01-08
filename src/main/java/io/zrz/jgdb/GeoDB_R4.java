@@ -11,7 +11,7 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * @see https://github.com/rouault/dump_gdbtable/wiki/FGDB-Spec
+ * @see <a href='https://github.com/rouault/dump_gdbtable/wiki/FGDB-Spec'></a>
  */
 
 final class GeoDB_R4 extends AbstractGeoDB {
@@ -76,7 +76,7 @@ final class GeoDB_R4 extends AbstractGeoDB {
   /**
    * Opens a V9 catalog. In V9, this is
    * 
-   * @see https://github.com/rouault/dump_gdbtable/wiki/FGDB-Spec
+   * @see <a href='https://github.com/rouault/dump_gdbtable/wiki/FGDB-Spec'></a>
    */
 
   @Override
@@ -145,6 +145,11 @@ final class GeoDB_R4 extends AbstractGeoDB {
     return this.userTables.values().stream()
             .map(item -> item.getTableName())
             .collect(Collectors.toList());
+  }
+
+  @Override
+  public Map<String, List<String>> getLayerTree() {
+    return null;
   }
 
   @Override

@@ -25,6 +25,10 @@ public class GeometryFieldType implements FieldType {
 
   private double xmin, ymin, xmax, ymax;
 
+  @Override
+  public Class<?> getJavaType() {
+    return Object.class;
+  }
   /**
    * 
    */

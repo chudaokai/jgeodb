@@ -6,12 +6,17 @@ import lombok.Builder;
 import lombok.Value;
 
 @Value
-@Builder class FloatFieldType implements FieldType {
+@Builder
+class FloatFieldType implements FieldType {
 
   private boolean nullable;
   private int width;
   private float defaultValue;
 
+  @Override
+  public Class<?> getJavaType() {
+    return float.class;
+  }
   @Override
   public Object read(GeoBuffer file) throws IOException {
     return file.readF32();

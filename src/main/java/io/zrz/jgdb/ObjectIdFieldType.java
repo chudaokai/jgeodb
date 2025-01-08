@@ -9,6 +9,10 @@ class ObjectIdFieldType implements FieldType {
 
   public static final ObjectIdFieldType INSTANCE = new ObjectIdFieldType();
 
+  @Override
+  public Class<?> getJavaType() {
+    return int.class;
+  }
   /**
    * Can't read the object ID field ...
    */

@@ -11,6 +11,10 @@ import lombok.Value;
   private boolean nullable;
   private int width;
   private double defaultValue;
+  @Override
+  public Class<?> getJavaType() {
+    return double.class;
+  }
 
   @Override
   public Object read(GeoBuffer file) throws IOException {

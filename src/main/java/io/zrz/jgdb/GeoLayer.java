@@ -122,4 +122,7 @@ public interface GeoLayer extends Iterable<GeoFeature> {
     return StreamSupport.stream(spliterator(), true);
   }
 
+  default <R> R convert(GeoFeatureConvertor<R, GeoLayer> convertor){
+    return convertor.convert(this);
+  }
 }

@@ -1,6 +1,7 @@
 package io.zrz.jgdb;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * An real-only instance of a GeoDB.
@@ -30,6 +31,8 @@ public interface GeoDB extends AutoCloseable {
    * @return
    */
   List<String> getLayers(String datasetName);
+
+  Map<String,List<String>> getLayerTree();
   /**
    * Each of the datasets.
    * @return

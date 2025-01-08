@@ -98,8 +98,9 @@ abstract class AbstractGeoDB implements GeoDB {
 
   @Override
   public final void close() {
-    // copy open set, then close them all.
-    this.opened.values().forEach(GeoTable::close);
+    List<GeoTable> vals = new ArrayList<>(this.opened.values());
+    vals.forEach(GeoTable::close);
+    vals.clear();
   }
 
   /**

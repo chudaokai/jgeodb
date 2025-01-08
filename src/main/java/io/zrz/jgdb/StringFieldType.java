@@ -15,6 +15,10 @@ class StringFieldType implements FieldType {
   private String defaultValue;
 
   @Override
+  public Class<?> getJavaType() {
+    return String.class;
+  }
+  @Override
   public Object read(GeoBuffer file) throws IOException {
 
     int clen = file.readVarUInt32();

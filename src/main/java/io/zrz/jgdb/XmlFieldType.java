@@ -31,7 +31,10 @@ class XmlFieldType implements FieldType {
   private boolean nullable;
   // private int maxlen;
   private String defaultValue;
-
+  @Override
+  public Class<?> getJavaType() {
+    return String.class;
+  }
   @Override
   public Object read(GeoBuffer file) throws IOException {
 
